@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -40,6 +40,14 @@ async function run() {
       const result = await foods_collection.find().toArray();
       res.send(result);
     });
+    // GET :: get single food data from foods collection in database
+    app.get("/food/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await foods_collection.findOne(query);
+      res.send(result);
+    });
+
     // GET :: get top 6 foods from foods collection in database
     app.get("/top-foods", async (req, res) => {
       let query = {};
