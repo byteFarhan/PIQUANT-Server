@@ -35,8 +35,30 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+    // GET :: get all foods from foods collection in database
     app.get("/foods", async (req, res) => {
       const result = await foods_collection.find().toArray();
+      res.send(result);
+    });
+    // GET :: get top 6 foods from foods collection in database
+    app.get("/top-foods", async (req, res) => {
+      let query = {};
+      const filter = { numberOfPurchases: -1 };
+      const options = {
+        projection: {
+          _id: 1,
+          foodName: 1,
+          foodImage: 1,
+          description: 1,
+          postedDate: 1,
+          price: 1,
+        },
+      };
+      const result = await foods_collection
+        .find(query, options)
+        .sort(filter)
+        .limit(6)
+        .toArray();
       res.send(result);
     });
 
