@@ -77,7 +77,7 @@ async function run() {
       res.send(result);
     });
 
-    // GET :: add new food item into foods collection in database
+    // POST :: add new food item into foods collection in database
     app.post("/foods", async (req, res) => {
       const theFood = req.body;
       console.log(theFood);
