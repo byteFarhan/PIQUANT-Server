@@ -8,7 +8,9 @@ const port = process.env.PORT || 5000;
 
 // const origin = ["http://localhost:5173/"];
 //Middlewares
-const origin = "http://localhost:5173";
+const origin = ["http://localhost:5173", "https://piquant-b9a11.web.app"];
+// const origin = "https://piquant-b9a11.web.app";
+// const origin = "*";
 // app.use(cors({
 //   origin: origin,
 //   methods: ["GET", "POST", "PUT", "DELETE"], // Allow additional methods if needed
@@ -37,7 +39,12 @@ async function run() {
     // await client.connect();
     // GET :: get all foods from foods collection in database
     app.get("/foods", async (req, res) => {
-      const result = await foods_collection.find().toArray();
+      let quary = {};
+      if (req.query.searchFor) {
+        // console.log(req.query.searchFor);
+        quary = { foodName: { $regex: new RegExp(req.query.searchFor, "i") } };
+      }
+      const result = await foods_collection.find(quary).toArray();
       res.send(result);
     });
     // GET :: get single food data from foods collection in database
