@@ -77,6 +77,15 @@ async function run() {
       res.send(result);
     });
 
+    // GET :: add new food item into foods collection in database
+    app.post("/foods", async (req, res) => {
+      const theFood = req.body;
+      console.log(theFood);
+      const result = await foods_collection.insertOne(theFood);
+      console.log(result);
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(
