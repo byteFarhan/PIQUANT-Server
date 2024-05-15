@@ -45,6 +45,9 @@ async function run() {
       if (req.query.searchFor) {
         // console.log(req.query.searchFor);
         quary = { foodName: { $regex: new RegExp(req.query.searchFor, "i") } };
+      } else if (req.query.authorEmail) {
+        // console.log(req.query.authorEmail);
+        quary = { "author.authorEmail": req.query.authorEmail };
       }
       const result = await foods_collection.find(quary).toArray();
       res.send(result);
@@ -85,7 +88,7 @@ async function run() {
       const theFood = req.body;
       console.log(theFood);
       const result = await foods_collection.insertOne(theFood);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
 
@@ -99,6 +102,14 @@ async function run() {
         $inc: { numberOfPurchases: purchasesQuantity },
       };
       const result = await foods_collection.updateOne(filter, document);
+      res.send(result);
+    });
+
+    // DELETE :: delete single food data from foods collection in database
+    app.delete("/foods/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await foods_collection.deleteOne(filter);
       res.send(result);
     });
 
