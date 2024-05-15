@@ -69,6 +69,7 @@ async function run() {
           description: 1,
           postedDate: 1,
           price: 1,
+          numberOfPurchases: 1,
         },
       };
       const result = await foods_collection
@@ -85,6 +86,19 @@ async function run() {
       console.log(theFood);
       const result = await foods_collection.insertOne(theFood);
       console.log(result);
+      res.send(result);
+    });
+
+    // PATCH :: update food item into foods collection in database
+    app.patch("/foods", async (req, res) => {
+      const purchasesInfo = req.body;
+      const { productId, purchasesQuantity } = purchasesInfo;
+      // console.log(productId, purchasesQuantity);
+      const filter = { _id: new ObjectId(productId) };
+      const document = {
+        $inc: { numberOfPurchases: purchasesQuantity },
+      };
+      const result = await foods_collection.updateOne(filter, document);
       res.send(result);
     });
 
