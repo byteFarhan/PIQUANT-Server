@@ -105,6 +105,45 @@ async function run() {
       res.send(result);
     });
 
+    // PUT :: update single food data into foods collection in database
+    app.put("/food/:id", async (req, res) => {
+      const id = req.params.id;
+      const getFood = req.body;
+      const {
+        foodImage,
+        foodQuantity,
+        foodCategory,
+        foodName,
+        availableQuantity,
+        foodOrigin,
+        description,
+        price,
+        rating,
+      } = getFood;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedFood = {
+        $set: {
+          ...getFood,
+          // foodName: foodName,
+          // foodImage: foodImage,
+          // foodCategory: foodCategory,
+          // foodQuantity: foodQuantity,
+          // availableQuantity: availableQuantity,
+          // foodOrigin: foodOrigin,
+          // description: description,
+          // price: price,
+          // rating: rating,
+        },
+      };
+      const result = await foods_collection.updateOne(
+        filter,
+        updatedFood,
+        options
+      );
+      res.send(result);
+    });
+
     // DELETE :: delete single food data from foods collection in database
     app.delete("/foods/:id", async (req, res) => {
       const id = req.params.id;
