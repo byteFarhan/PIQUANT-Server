@@ -33,6 +33,7 @@ const client = new MongoClient(uri, {
 
 const foods_collection = client.db("PIQUANT-B9A11").collection("foods");
 const reviews_collection = client.db("PIQUANT-B9A11").collection("reviews");
+const purchases_collection = client.db("PIQUANT-B9A11").collection("purchases");
 
 async function run() {
   try {
@@ -100,6 +101,19 @@ async function run() {
       const result = await reviews_collection.insertOne(newReview);
       res.send(result);
     });
+
+    // POST :: add new item or food into purchases collection in database
+    app.post("/purchases", async (req, res) => {
+      const newPurchase = req.body;
+      const result = await purchases_collection.insertOne(newPurchase);
+      res.send(result);
+    });
+    // GET :: get all purchased foods from purchases collection in database
+    app.get("/purchases", async (req, res) => {
+      const result = await purchases_collection.find().toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(
