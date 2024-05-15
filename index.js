@@ -89,7 +89,7 @@ async function run() {
       res.send(result);
     });
 
-    // PATCH :: update food item into foods collection in database
+    // PATCH :: update the 'numberOfPurchases' property of food items when a user purchases food.
     app.patch("/foods", async (req, res) => {
       const purchasesInfo = req.body;
       const { productId, purchasesQuantity } = purchasesInfo;
@@ -124,7 +124,11 @@ async function run() {
     });
     // GET :: get all purchased foods from purchases collection in database
     app.get("/purchases", async (req, res) => {
-      const result = await purchases_collection.find().toArray();
+      let query = {};
+      if (req.query.userEmail) {
+        query = { "buyerInfo.buyerEmail": req.query.userEmail };
+      }
+      const result = await purchases_collection.find(query).toArray();
       res.send(result);
     });
 
