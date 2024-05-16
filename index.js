@@ -21,16 +21,17 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-const varifyToken = async (req, res, next) => {
-  const token = req?.cookie?.token;
+const verifyToken = async (req, res, next) => {
+  const token = req?.cookies?.token;
+  // console.log(token);
   if (!token) {
     return res.status(401).send({ message: "unauthorized access" });
   }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).send({ message: "unauthorized access" });
     }
-    req.user(decode);
+    req.user = decoded;
     next();
   });
 };
@@ -78,8 +79,11 @@ async function run() {
       res.clearCookie("token", { maxAge: 0 }).send({ seccess: true });
     });
 
-    // GET :: get all foods from foods collection in database
-    app.get("/foods", async (req, res) => {
+    // GET :: get multiple foods from foods collection in database
+    app.get("/foods", verifyToken, async (req, res) => {
+      if (req?.query?.authorEmail !== req?.user?.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       let quary = {};
       if (req.query.searchFor) {
         // console.log(req.query.searchFor);
@@ -125,7 +129,7 @@ async function run() {
     // POST :: add new food item into foods collection in database
     app.post("/foods", async (req, res) => {
       const theFood = req.body;
-      console.log(theFood);
+      // console.log(theFood);
       const result = await foods_collection.insertOne(theFood);
       // console.log(result);
       res.send(result);
@@ -148,31 +152,11 @@ async function run() {
     app.put("/food/:id", async (req, res) => {
       const id = req.params.id;
       const getFood = req.body;
-      const {
-        foodImage,
-        foodQuantity,
-        foodCategory,
-        foodName,
-        availableQuantity,
-        foodOrigin,
-        description,
-        price,
-        rating,
-      } = getFood;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
       const updatedFood = {
         $set: {
           ...getFood,
-          // foodName: foodName,
-          // foodImage: foodImage,
-          // foodCategory: foodCategory,
-          // foodQuantity: foodQuantity,
-          // availableQuantity: availableQuantity,
-          // foodOrigin: foodOrigin,
-          // description: description,
-          // price: price,
-          // rating: rating,
         },
       };
       const result = await foods_collection.updateOne(
@@ -212,8 +196,13 @@ async function run() {
       res.send(result);
     });
 
-    // GET :: get all purchased foods from purchases collection in database
-    app.get("/purchases", async (req, res) => {
+    // GET :: get multiple purchased foods from purchases collection in database
+    app.get("/purchases", verifyToken, async (req, res) => {
+      // console.log("requested info", req.query);
+      // console.log("decoded info", req.user);
+      if (req?.query?.userEmail !== req.user.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
       let query = {};
       if (req.query.userEmail) {
         query = { "buyerInfo.buyerEmail": req.query.userEmail };
