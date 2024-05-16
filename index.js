@@ -52,8 +52,8 @@ async function run() {
 
     // POST :: post method to set JWT  token in client side cookie
     app.post("/jwt", async (req, res) => {
-      // const user = req.body;
-      console.log(user);
+      const user = req.body;
+      // console.log(user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
@@ -64,6 +64,13 @@ async function run() {
           sameSite: "none",
         })
         .send({ seccess: true });
+    });
+
+    // POST :: This method use for clear browser Cookie when user logout there account.
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      console.log(user);
+      res.clearCookie("token", { maxAge: 0 }).send({ seccess: true });
     });
 
     // GET :: get all foods from foods collection in database
