@@ -8,32 +8,27 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
+// const origin = ["http://localhost:5173/"];
 //Middlewares
 const origin = ["http://localhost:5173", "https://piquant-b9a11.web.app"];
-
+// const origin = "https://piquant-b9a11.web.app";
+// const origin = "*";
+// app.use(cors({
+//   origin: origin,
+//   methods: ["GET", "POST", "PUT", "DELETE"], // Allow additional methods if needed
+//   allowedHeaders: ["Content-Type", "Authorization", "X-My-Custom-Header"], // Allow custom headers
+// }));
 app.use(
   cors({
     origin: origin,
     credentials: true,
-    // methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+// app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-const varifyToken = async (req, res, next) => {
-  const token = req?.cookie?.token;
-  if (!token) {
-    return res.status(401).send({ message: "unauthorized access" });
-  }
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
-    if (err) {
-      return res.status(401).send({ message: "unauthorized access" });
-    }
-    req.user(decode);
-    next();
-  });
-};
 // const uri = `mongodb://localhost:27017`;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jr4kdoi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -74,7 +69,7 @@ async function run() {
     // POST :: This method use for clear browser Cookie when user logout there account.
     app.post("/logout", async (req, res) => {
       const user = req.body;
-      // console.log(user);
+      console.log(user);
       res.clearCookie("token", { maxAge: 0 }).send({ seccess: true });
     });
 
