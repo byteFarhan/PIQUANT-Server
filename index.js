@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
@@ -16,8 +18,16 @@ const origin = ["http://localhost:5173", "https://piquant-b9a11.web.app"];
 //   methods: ["GET", "POST", "PUT", "DELETE"], // Allow additional methods if needed
 //   allowedHeaders: ["Content-Type", "Authorization", "X-My-Custom-Header"], // Allow custom headers
 // }));
-app.use(cors({ origin: origin, credentials: true }));
+app.use(
+  cors({
+    origin: origin,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+// app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // const uri = `mongodb://localhost:27017`;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jr4kdoi.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -39,6 +49,23 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
+
+    // POST :: post method to set JWT  token in client side cookie
+    app.post("/jwt", async (req, res) => {
+      // const user = req.body;
+      console.log(user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        })
+        .send({ seccess: true });
+    });
+
     // GET :: get all foods from foods collection in database
     app.get("/foods", async (req, res) => {
       let quary = {};
@@ -161,7 +188,7 @@ async function run() {
     // POST :: add new user review into review gallary collection in database
     app.post("/reviews", async (req, res) => {
       const newReview = req.body;
-      console.log(newReview);
+      // console.log(newReview);
       const result = await reviews_collection.insertOne(newReview);
       res.send(result);
     });
@@ -172,6 +199,7 @@ async function run() {
       const result = await purchases_collection.insertOne(newPurchase);
       res.send(result);
     });
+
     // GET :: get all purchased foods from purchases collection in database
     app.get("/purchases", async (req, res) => {
       let query = {};
